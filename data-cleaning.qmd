@@ -3,3 +3,47 @@ title: Data Cleaning
 format: typst
 ---
 
+```{r}
+library(tidyverse)
+library(janitor)
+library(readr)
+
+raw <- read_csv("/Users/jayson/Documents/stat133/project-5/gerrymandering-jayson-abarca/data/g24_sov_by_g24_svprec.csv")
+
+precinct_data <- raw |>
+  janitor::clean_names()
+
+glimpse(precinct_data)
+
+precinct_data <- precinct_data |>
+  mutate(across(where(is.character), readr::parse_number)) |>
+  mutate(
+    county = as.integer(county),
+    fips = as.character(fips),
+    svprec = as.character(svprec),
+    svprec_key = as.character(svprec_key),
+    demvote = cngdem01,      
+    repvote = cngrep01,     
+    totvote = totvote,      
+    totreg  = totreg   
+  )
+
+duplicates <- precinct_data |>
+  count(svprec_key) |>
+  filter(n > 1)
+
+print(duplicates)
+
+summary(select(data, totvote, totreg, demvote, repvote))
+
+cleaned <- precinct_data |>
+  select(
+    county, fips, svprec_key, cddist, sddist, bedist,
+    totreg, totvote, demvote, repvote
+  )  |>
+  filter(totvote > 0, totreg > 0)
+
+write_csv(cleaned, "/Users/jayson/Documents/stat133/project-5/gerrymandering-jayson-abarca/data/cleaned_precinct_votes.csv")
+
+sum(cleaned$demvote + cleaned$repvote > cleaned$totvote)
+```

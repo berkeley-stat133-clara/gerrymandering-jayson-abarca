@@ -9,14 +9,14 @@ Recall the 3 quantitative approaches to measuring gerrymandering discussed in le
 3. Ensembles / Extreme Outliers\
 Use the following table to practice applying the first two techniques.\
 
-| District | D Votes | R Votes | Result  |
-|:---------:|:-------:|:-------:|:--------|
-| 1 | 62 | 38 | D wins |
-| 2 | 55 | 45 | D wins |
-| 3 | 44 | 56 | R wins |
-| 4 | 47 | 53 | R wins |
-| 5 | 46 | 54 | R wins |
-| **Total** | **254** | **246** |          |
+| District  | D Votes | R Votes | Result |
+|:---------:|:-------:|:-------:|:-------|
+|     1     |   62    |   38    | D wins |
+|     2     |   55    |   45    | D wins |
+|     3     |   44    |   56    | R wins |
+|     4     |   47    |   53    | R wins |
+|     5     |   46    |   54    | R wins |
+| **Total** | **254** | **246** |        |
 
 ```{r}
 #| message: false
@@ -41,7 +41,6 @@ Calculate the mean-median score associated with this particular district breakdo
 Calculate the Efficiency Gap (EG) associated with this particular district breakdown of votes.
 
 *Tip*: it may be helpful to write a function that takes a vector of votes across districts for party A and vector of votes for the party B and returns a vector of the number votes wasted by party A across districts.
-
 
 ```{r}
 # add code for Q2 here

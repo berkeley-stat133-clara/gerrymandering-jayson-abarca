@@ -5,24 +5,53 @@ format: typst
 
 ### Question 1
 
-Put your question here.
+What percentage of precincts were won by Democrats vs Republicans?
 
 ### Answer 1
 
-Put your answer here.
+```{r}
+percentage <- cleaned %>%
+  mutate(winner = if_else(demvote > repvote, "Democrat", "Republican")) %>%
+  count(winner) %>%
+  mutate(percent = n / sum(n))
+
+print(percentage)
+```
 
 ### Question 2
 
-Put your question here.
+How do turnout rate vary across precincts?
 
 ### Answer 2
 
-Put your answer here.
+```{r}
+library(ggplot2)
+cleaned %>%
+  mutate(turnout = totvote / totreg) %>%
+  ggplot(aes(x = turnout)) +
+  geom_histogram(bins = 50) +
+  labs(title = "Distribution of Precinct Turnout",
+       x = "Turnout rate", 
+       y = "Number of precincts") +
+  coord_cartesian(xlim = c(0, 4))  
+```
 
 ### Question 3
 
-Put your question here.
+Which districts had the smallest margins of votes between democrats and republicans?
 
 ### Answer 3
 
-Put your answer here.
+```{r}
+district_margins <- cleaned %>%
+  group_by(cddist) %>%
+  summarise(
+    dem_total = sum(demvote, na.rm = TRUE),
+    rep_total = sum(repvote, na.rm = TRUE),
+    margin = abs(dem_total - rep_total) / (dem_total + rep_total)
+  ) %>%
+  arrange(margin)
+
+head(district_margins, 5)
+tail(district_margins, 5)
+```

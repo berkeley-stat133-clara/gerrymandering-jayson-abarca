@@ -3,9 +3,74 @@ title: Gerrymandering Metrics
 format: typst
 ---
 
+### Part 4
+
+```{r}
+library(tidyverse)
+
+# Mean–Median Score
+mean_median <- function(dem_share) {
+  mean(dem_share) - median(dem_share)
+}
+
+# Efficiency Gap
+efficiency_gap <- function(dvotes, rvotes) {
+
+  total_votes <- dvotes + rvotes
+  half <- total_votes / 2
+
+  wasted_d <- ifelse(dvotes > rvotes,
+                     dvotes - half,
+                     dvotes)
+
+  wasted_r <- ifelse(rvotes > dvotes,
+                     rvotes - half,
+                     rvotes)
+
+  (sum(wasted_r) - sum(wasted_d)) / sum(total_votes)
+}
+```
+
+
 ### 2024 Election Results and the 2024 District Map
 
+```{r}
+district_2024 <- cleaned %>%
+  group_by(cddist) %>%
+  summarise(
+    dem_total = sum(demvote, na.rm = TRUE),
+    rep_total = sum(repvote, na.rm = TRUE)
+  ) %>%
+  mutate(
+    share_dem = dem_total / (dem_total + rep_total)
+  )
+
+# Mean–Median Score (2024 map)
+mm_2024 <- mean_median(district_2024$share_dem)
+
+# Efficiency Gap (2024 map)
+eg_2024 <- efficiency_gap(district_2024$dem_total,
+                          district_2024$rep_total)
+
+mm_2024
+eg_2024
+```
 
 
 ### 2024 Election Results and the proposed 2025 District Map
 
+```{r}
+results_2025 <- results_2025 %>%
+  mutate(
+    share_dem = dem_total / (dem_total + rep_total)
+  )
+
+mm_2025 <- mean_median(results_2025$share_dem)
+
+# Efficiency Gap (2025 map)
+eg_2025 <- efficiency_gap(results_2025$dem_total,
+                          results_2025$rep_total)
+
+mm_2025
+eg_2025
+```

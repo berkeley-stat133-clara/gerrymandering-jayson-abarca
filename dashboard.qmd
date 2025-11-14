@@ -3,3 +3,101 @@ title: Dashboard
 format: dashboard
 ---
 
+```{r}
+library(tidyverse)
+library(sf)
+library(ggplot2)
+library(dplyr)
+library(readxl)
+
+cleaned <- read_csv("/Users/jayson/Documents/stat133/project-5/gerrymandering-jayson-abarca/data/cleaned_precinct_votes.csv")
+
+district_2024 <- read_csv("/Users/jayson/Documents/stat133/project-5/gerrymandering-jayson-abarca/data/g24_sov_by_g24_svprec.csv")
+
+results_2025 <- read_xlsx("/Users/jayson/Documents/stat133/project-5/gerrymandering-jayson-abarca/data/g24-results-by-district.xlsx")
+
+district_2024_sf <- st_read("/Users/jayson/Documents/stat133/project-5/gerrymandering-jayson-abarca/srprec_state_g24_v01_shp/srprec_state_g24_v01_shp.shp")
+districts_2025_sf <- st_read("/Users/jayson/Documents/stat133/project-5/gerrymandering-jayson-abarca/AB604.shp")
+```
+
+1.  Summary Stats Comparison
+
+```{r}
+comparison <- tibble(
+  Map = c("2024 District Map", "Proposed 2025 Map"),
+  `D Seat Share` = c(sum(district_2024$dem_total > district_2024$rep_total),
+                     sum(results_2025$dem_total > results_2025$rep_total)),
+  `Mean–Median Score` = c(mm_2024, mm_2025),
+  `Efficiency Gap` = c(eg_2024, eg_2025)
+)
+
+comparison
+```
+
+2.  
+
+```{r}
+p1 <- ggplot(districts_2024_sf) +
+  geom_sf(aes(fill = factor(cddist))) +
+  labs(title = "2024 Congressional Districts")
+
+p2 <- ggplot(districts_2025_sf) +
+  geom_sf(aes(fill = factor(new_district))) +
+  labs(title = "Proposed AB 604 Districts (2025)")
+
+p1
+p2
+```
+
+3.  
+
+```{r}
+seats <- tibble(
+  Map = c("2024", "2025"),
+  Dem_Seats = c(sum(district_2024$dem_total > district_2024$rep_total),
+                sum(results_2025$dem_total > results_2025$rep_total)),
+  Rep_Seats = c(sum(district_2024$rep_total > district_2024$dem_total),
+                sum(results_2025$rep_total > results_2025$dem_total))
+)
+
+seats
+```
+
+4.  
+
+```{r}
+bind_rows(
+  district_2024 %>% mutate(Plan = "2024"),
+  results_2025 %>% mutate(Plan = "2025")
+) %>%
+  ggplot(aes(x = share_dem, fill = Plan)) +
+  geom_density(alpha = 0.4) +
+  labs(title = "Distribution of Democratic District Vote Share",
+       x = "Dem Vote Share", y = "Density")
+```
+
+5.  Data Sources:
+
+-   2024 precinct vote data: California Statewide Database
+
+-   2024 district shapefile: Secretary of State
+
+-   AB 604 proposed map shapefile: Assembly Elections Committee
+
+Cleaning:
+
+-   Removed precincts with zero registration or vote totals
+
+-   Converted numeric vote columns using parse_number()
+
+-   Aggregated votes to district level
+
+Reallocation:
+
+-   Used area-weighted interpolation
+
+Metrics:
+
+-   Mean-Median Score: Difference between the average and the median district vote share
+
+-   Efficiency Gap: the differences in wasted votes
